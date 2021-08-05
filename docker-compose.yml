@@ -1,0 +1,26 @@
+version: '3.2'
+
+services:
+   db:
+       image: mysql:8.0
+       container_name: appsDBgo
+       platform: linux/amd64
+       restart: always
+       ports:
+              - '3306:3306'
+       environment:
+              MYSQL_ROOT_PASSWORD: helloworld
+       volumes: 
+              - ./db:/var/lib/mysql
+   app:
+      depends_on:
+       - db
+      image: phpmyadmin/phpmyadmin
+      container_name: phpmyadmingo
+      restart: always
+      ports:
+       - '8080:80'
+      environment:
+        PMA_HOST: db
+volumes: 
+       db:
