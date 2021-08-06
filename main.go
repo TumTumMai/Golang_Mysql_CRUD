@@ -25,7 +25,7 @@ func main() {
 	e.PUT("/items/:id", h.UpdateItem)
 	e.DELETE("/items/:id", h.DeleteItem)
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":8000"))
 }
 
 type itemList struct {
