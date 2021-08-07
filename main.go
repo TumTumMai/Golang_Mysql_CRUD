@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/go-playground/validator"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/labstack/echo"
@@ -46,8 +48,8 @@ func (h *itemList) Initialize() {
 
 type Item struct {
 	Id    uint   `gorm:"primary_key" json:"id"`
-	Name  string `json:"name"`
-	Price int    `json:"price"`
+	Name  string `json:"name" validate:"required"` ////เเท็กเอาไว้ระรับค่า เเละส่งค่าตามที่ระบุ "เป็นkeyของjson"เเละ"เป็นชื่อคอลั่มในdatabase"
+	Price int    `json:"price" validate:"required"`
 }
 
 func (h *itemList) GetAllItem(c echo.Context) error {
@@ -69,10 +71,18 @@ func (h *itemList) GetItem(c echo.Context) error {
 	return c.JSON(http.StatusOK, items)
 }
 
+///// มีวิธีอื่น///หาvalidation
 func (h *itemList) SaveItem(c echo.Context) error {
 	items := Item{}
 
 	if err := c.Bind(&items); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	// var validate *validator.Validate
+	validate := validator.New()
+	if err := validate.Struct(items); err != nil {
+		fmt.Println(items)
 		return c.NoContent(http.StatusBadRequest)
 	}
 
@@ -110,13 +120,16 @@ func (h *itemList) UpdateItem(c echo.Context) error {
 
 func (h *itemList) DeleteItem(c echo.Context) error {
 	id := c.Param("id")
-	item := Item{}
+	// item := Item{}
 
-	if err := h.DB.Find(&item, id).Error; err != nil {
+	// if err := h.DB.Find(&item, id).Error; err != nil {
+	// 	return c.String(http.StatusNotFound, "IdNotFound")
+	// }
+
+	result := h.DB.Delete(&Item{}, id)
+	if result.RowsAffected == 0 {
 		return c.String(http.StatusNotFound, "IdNotFound")
 	}
 
-	h.DB.Delete(&item)
-
-	return c.String(http.StatusOK, "Delete successfully")
+	return c.String(http.StatusOK, "Deletesuseccfull")
 }
